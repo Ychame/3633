@@ -15,14 +15,14 @@ case "$1" in
     "tcache_bin")
         ./tcache_bin.gdb --args heap_experiment 3
         ;;
-    "free_hook")
-        ./tcache_bin.gdb --args heap_experiment 3
-        ;;
     "fast_bin")
         ./fast_bin.gdb --args heap_experiment 4
         ;;
     "unsorted_bin")
         ./unsorted_bin.gdb --args heap_experiment 5
+        ;;
+    "free_hook")
+        ./free_hook.gdb --args heap_experiment 6
         ;;
     *)
         echo "Invalid command: $1"

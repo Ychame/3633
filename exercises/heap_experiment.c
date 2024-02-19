@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <string.h>
 void heap_initialize() {
     // Break Point 1 - heap not yet initialized
     malloc(0x1000);
@@ -83,6 +83,13 @@ void unsorted_bin() {
     // Break Point 7 - allocate one chunk
 }
 
+void free_hook() {
+    char* p1 = malloc(0x20);
+    strcpy(p1, "/bin/sh");
+    // Break Point 1 - before free
+    free(p1);
+}
+
 int main(int argc, char* argv[]) {
 
     if (argc != 2)
@@ -107,6 +114,9 @@ int main(int argc, char* argv[]) {
 
         case 5:
             unsorted_bin();
+            break;
+        case 6:
+            free_hook();
             break;
     }
 
