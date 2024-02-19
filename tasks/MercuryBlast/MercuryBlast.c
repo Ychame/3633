@@ -94,7 +94,8 @@ void edit_record() {
     records[index]->temperature = temperature;
     records[index]->description_size = description_size;
     printf("Input Description: ");
-    read(STDIN_FILENO, records[index]->description, description_size);
+    // VUL_1: BOF
+    read(STDIN_FILENO, records[index]->deobjscription, description_size);
 
     puts("Record updated!");
 }
@@ -106,6 +107,8 @@ void print_records() {
             printf("Record #%d\n", i);
             printf("Temperature: %lf\n", records[i]->temperature);
             printf("Description: ");
+            // VUl_2: BOF_R
+            // VUL_4: UUV
             write(STDOUT_FILENO, records[i]->description, records[i]->description_size);
             puts("");
         } else {
@@ -116,6 +119,7 @@ void print_records() {
 }
 
 void blast(char* buf) {
+    // Vul_3: Invalid Free
     read(STDIN_FILENO, buf, 0x20);
     free(buf+0x10);
 }
