@@ -94,7 +94,7 @@ void edit_record() {
     records[index]->temperature = temperature;
     records[index]->description_size = description_size;
     printf("Input Description: ");
-    // VUL_1: BOF_W
+    // VUL_1: BOF
     read(STDIN_FILENO, records[index]->description, description_size);
 
     puts("Record updated!");

