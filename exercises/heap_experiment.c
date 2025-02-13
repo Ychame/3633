@@ -61,7 +61,7 @@ void unsorted_bin() {
     char* p4 = malloc(0x100);
     char* p5 = malloc(0x100);
     char* p6 = malloc(0x100);
-    // Break Point 1 - allocated 7 + 5 chunks
+    // Break Point 1 - allocated 7 + 6 chunks
 
     for (int i = 0; i < 7; i++)
         free(fill_tcache[i]);
